@@ -1,0 +1,27 @@
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.drombler.photo.fx.desktop.sample.impl;
+
+import javafx.scene.layout.BorderPane;
+import org.drombler.acp.core.docking.ViewDocking;
+import org.drombler.acp.core.docking.WindowMenuEntry;
+import org.drombler.commons.fx.fxml.FXMLLoaders;
+
+@ViewDocking(areaId = "bottom", position = 10, displayName = "%displayName", icon = "bottom-test-pane.png",
+accelerator = "Shortcut+2",
+menuEntry =
+@WindowMenuEntry(path = "", position = 30))
+public class BottomTestPane extends BorderPane {
+
+    public BottomTestPane() {
+        loadFXML();
+    }
+
+    private void loadFXML() {
+        FXMLLoaders.loadRoot(this);
+    }
+    
+}
