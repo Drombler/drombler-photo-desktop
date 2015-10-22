@@ -18,20 +18,20 @@ import org.drombler.identity.core.DromblerId;
  */
 public class MediaStorage {
 
-    private final Path mediaDir;
+    private final Path mediaRootDir;
     private final Set<String> supportedExtensions;
 
     protected MediaStorage(Path mediaDir, String... supportedExtensions) {
-        this.mediaDir = mediaDir;
+        this.mediaRootDir = mediaDir;
         this.supportedExtensions = new HashSet<>(Arrays.asList(supportedExtensions));
     }
 
-    public Path getMediaDirPath(Event event, DromblerId dromblerId) {
+    public Path getMediaEventDirPath(Event event, DromblerId dromblerId) {
         return resolveMediaEventDirPath(event).resolve(dromblerId.getDromblerIdFormatted());
     }
 
     private Path resolveMediaEventDirPath(Event event) {
-        return mediaDir.resolve(event.getDirName());
+        return getMediaRootDir().resolve(event.getDirName());
     }
     
     public boolean isSupportedByFileExtension(String fileName){
@@ -43,5 +43,12 @@ public class MediaStorage {
             return false;
         }
                 
+    }
+
+    /**
+     * @return the mediaRootDir
+     */
+    public Path getMediaRootDir() {
+        return mediaRootDir;
     }
 }
