@@ -7,6 +7,7 @@ package org.drombler.event.core;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -17,8 +18,7 @@ import java.util.regex.Pattern;
 public class FullTimeEventDuration implements EventDuration {
 
     private static final String MONTH_APPENDIX = "00";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyyMM");
+    private static final DateTimeFormatter SINGLE_DAY_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final Pattern DATE_PATTERN = Pattern.compile("\\d{8}");
 
     private final LocalDate startDateInclusive;
@@ -31,15 +31,45 @@ public class FullTimeEventDuration implements EventDuration {
 
     @Override
     public String getDirName() {
-        return getStartDateInclusive().equals(getEndDateInclusive()) ? getStartDateDirName() : getStartMonthDirName();
+        return isSingleDay() ? getSingleDayDirName() : getPeriodDirName();
     }
 
-    private String getStartDateDirName() {
-        return DATE_FORMATTER.format(getStartDateInclusive());
+    public boolean isSingleDay() {
+        return getStartDateInclusive().equals(getEndDateInclusive());
     }
 
-    private String getStartMonthDirName() {
-        return MONTH_FORMATTER.format(getStartDateInclusive()) + MONTH_APPENDIX;
+    private String getSingleDayDirName() {
+        return SINGLE_DAY_FORMATTER.format(getStartDateInclusive());
+    }
+
+    private String getPeriodDirName() {
+        return SINGLE_DAY_FORMATTER.format(getStartDateInclusive()) + "-" + SINGLE_DAY_FORMATTER.format(getEndDateInclusive());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.startDateInclusive);
+        hash = 53 * hash + Objects.hashCode(this.endDateInclusive);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof FullTimeEventDuration)) {
+            return false;
+        }
+        final FullTimeEventDuration other = (FullTimeEventDuration) obj;
+        return Objects.equals(this.startDateInclusive, other.startDateInclusive)
+                && Objects.equals(this.endDateInclusive, other.endDateInclusive);
+    }
+
+    @Override
+    public String toString() {
+        return "FullTimeEventDuration{" + "startDateInclusive=" + startDateInclusive + ", endDateInclusive=" + endDateInclusive + '}';
     }
 
     /**
@@ -57,9 +87,23 @@ public class FullTimeEventDuration implements EventDuration {
     }
 
     public static Optional<FullTimeEventDuration> singleDay(String dirName) {
-        if (DATE_PATTERN.matcher(dirName).matches() && ! dirName.endsWith(MONTH_APPENDIX)){
-            final LocalDate date = DATE_FORMATTER.parse(dirName, LocalDate::from);
+        if (matches(dirName)) {
+            final LocalDate date = SINGLE_DAY_FORMATTER.parse(dirName, LocalDate::from);
             return Optional.of(new FullTimeEventDuration(date, date));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static boolean matches(String dirName) {
+        return DATE_PATTERN.matcher(dirName).matches() && !dirName.endsWith(MONTH_APPENDIX);
+    }
+
+    public static Optional<FullTimeEventDuration> period(String startDateInclusiveString, String endDateInclusiveString) {
+        if (matches(startDateInclusiveString) && matches(endDateInclusiveString)) {
+            final LocalDate startDateInclusive = SINGLE_DAY_FORMATTER.parse(startDateInclusiveString, LocalDate::from);
+            final LocalDate endDateInclusive = SINGLE_DAY_FORMATTER.parse(endDateInclusiveString, LocalDate::from);
+            return Optional.of(new FullTimeEventDuration(startDateInclusive, endDateInclusive));
         } else {
             return Optional.empty();
         }
