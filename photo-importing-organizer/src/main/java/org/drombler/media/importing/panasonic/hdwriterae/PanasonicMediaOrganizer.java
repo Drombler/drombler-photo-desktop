@@ -5,9 +5,8 @@
  */
 package org.drombler.media.importing.panasonic.hdwriterae;
 
-import org.drombler.media.core.MediaOrganizer;
+import org.drombler.media.core.AbstractMediaOrganizer;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,6 +14,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.drombler.event.core.Event;
@@ -29,61 +29,26 @@ import org.drombler.media.core.video.VideoStorage;
  *
  * @author Florian
  */
-public class PanasonicMediaOrganizer extends MediaOrganizer {
+public class PanasonicMediaOrganizer extends AbstractMediaOrganizer {
 
     public static void main(String[] args) throws IOException {
         Path baseDirPath = Paths.get("D:\\hd-writer-ae-tmp");
         DromblerId defaultDromblerId = new DromblerUserId("puce");
 
-        PanasonicMediaOrganizer organizer = new PanasonicMediaOrganizer();
+        PanasonicMediaOrganizer organizer = new PanasonicMediaOrganizer(Paths.get("media-event-dir-paths.txt"));
         organizer.organize(baseDirPath, defaultDromblerId);
     }
 
     private static final Pattern RAW_DATE_PATTERN = Pattern.compile("\\d{2}-\\d{2}-\\d{4}");
     private static final DateTimeFormatter RAW_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
-    public void organize(Path baseDirPath, DromblerId defaultDromblerId) throws IOException {
-        PhotoStorage photoStorage = new PhotoStorage(baseDirPath);
-        VideoStorage videoStorage = new VideoStorage(baseDirPath);
-
-        try (final Stream<Path> paths = Files.list(baseDirPath)) {
-            paths.filter((Path path) -> RAW_DATE_PATTERN.matcher(getPathName(path)).matches()).forEach((Path path) -> {
-                try {
-                    moveFiles(path, defaultDromblerId, photoStorage, videoStorage);
-                    deleteEmptySrcDir(path);
-                } catch (IOException ex) {
-                    Logger.getLogger(PanasonicMediaOrganizer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
-        }
+    public PanasonicMediaOrganizer(Path mediaEventDirPathsFilePath) throws IOException {
+        super(mediaEventDirPathsFilePath, RAW_DATE_PATTERN, true);
     }
 
-    private void moveFiles(Path path, DromblerId dromblerId, PhotoStorage photoStorage, VideoStorage videoStorage) throws IOException {
-        Event event = getEvent(path);
-        Path photoDir = photoStorage.getMediaDirPath(event, dromblerId);
-        System.out.println(photoDir);
-        Path videoDir = videoStorage.getMediaDirPath(event, dromblerId);
-        System.out.println(videoDir);
-
-        try (final Stream<Path> filePaths = Files.list(path)) {
-            filePaths.forEach((Path filePath) -> {
-                System.out.println(filePath);
-                try {
-                    if (photoStorage.isSupportedByFileExtension(filePath.getFileName().toString())) {
-                        moveFile(filePath, photoDir);
-                    } else {
-                        moveFile(filePath, videoDir);
-                    }
-                } catch (IOException ex) {
-                    Logger.getLogger(PanasonicMediaOrganizer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
-        }
-    }
-
-    private Event getEvent(Path path) {
-        LocalDate date = RAW_DATE_FORMATTER.parse(getPathName(path), LocalDate::from);
-        return new Event("", new FullTimeEventDuration(date, date));
+    @Override
+    protected LocalDate getDate(Matcher matcher) {
+        return RAW_DATE_FORMATTER.parse(matcher.group(), LocalDate::from);
     }
 
 }

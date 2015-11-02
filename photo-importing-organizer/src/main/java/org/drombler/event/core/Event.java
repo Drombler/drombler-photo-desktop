@@ -75,7 +75,7 @@ public class Event {
                             ? FullTimeEventDuration.singleDay(parts[0])
                             : FullTimeEventDuration.period(parts[0], parts[1]);
             if (duration.isPresent()) {
-                return Optional.of(new Event((parts.length == 2) ? parts[1] : parts[3], duration.get()));
+                return Optional.of(new Event((parts.length == 2) ? parts[1] : parts[2], duration.get()));
             } else {
                 return Optional.empty();
             }
