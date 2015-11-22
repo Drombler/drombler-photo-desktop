@@ -12,13 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.drombler.event.core.Event;
-import org.drombler.event.core.FullTimeEventDuration;
 import org.drombler.identity.core.DromblerId;
 import org.drombler.identity.core.DromblerUserId;
 import org.drombler.media.core.photo.PhotoStorage;
@@ -49,6 +46,6 @@ public class PanasonicMediaOrganizer extends AbstractMediaOrganizer {
     @Override
     protected LocalDate getDate(Matcher matcher) {
         return RAW_DATE_FORMATTER.parse(matcher.group(), LocalDate::from);
-    }
-
+    }    
+    
 }
