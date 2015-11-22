@@ -117,32 +117,44 @@ public abstract class AbstractMediaOrganizer {
         }
     }
 
-
-
     public void organize(Path baseDirPath, DromblerId defaultDromblerId) throws IOException {
         PhotoStorage photoStorage = new PhotoStorage(baseDirPath);
         VideoStorage videoStorage = new VideoStorage(baseDirPath);
         updateEventMap(photoStorage.getMediaRootDir());
         updateEventMap(videoStorage.getMediaRootDir());
-        
+
         try (final Stream<Path> paths = Files.list(baseDirPath)) {
-            paths.filter(path -> ((directories && Files.isDirectory(path)) || (!directories && !Files.isDirectory(path))) 
+            paths.filter(path -> ((directories && Files.isDirectory(path)) || (!directories && !Files.isDirectory(path)))
                     && rawDatePattern.matcher(getPathName(path)).matches())
-                    .forEach(path -> {
+                    .forEach(path -> organize(path, defaultDromblerId, photoStorage, videoStorage));
+        }
+    }
+
+    private void organize(Path path, DromblerId defaultDromblerId, PhotoStorage photoStorage, VideoStorage videoStorage) {
+        try {
+            if (directories) {
+                try (final Stream<Path> paths = Files.list(path)) {
+                    paths.forEach(filePath -> {
                         try {
-                            moveFile(path, defaultDromblerId, photoStorage, videoStorage);
-                            if (directories){
-                                deleteEmptySrcDir(path);
-                            }
+                            moveFile(filePath, defaultDromblerId, photoStorage, videoStorage);
                         } catch (IOException ex) {
                             Logger.getLogger(AbstractMediaOrganizer.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
+                }
+                if (directories) {
+                    deleteEmptySrcDir(path);
+                }
+            } else {
+                moveFile(path, defaultDromblerId, photoStorage, videoStorage);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(AbstractMediaOrganizer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void moveFile(Path filePath, DromblerId dromblerId, PhotoStorage photoStorage, VideoStorage videoStorage) throws IOException {
-        Event event = getFirstEvent(filePath);
+        Event event = getFirstEvent(directories ? filePath.getParent() : filePath);
         Path photoDir = photoStorage.getMediaEventDirPath(event, dromblerId);
         System.out.println(photoDir);
         Path videoDir = videoStorage.getMediaEventDirPath(event, dromblerId);
