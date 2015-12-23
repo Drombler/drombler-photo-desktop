@@ -7,19 +7,14 @@ package org.drombler.media.importing.panasonic.hdwriterae;
 
 import org.drombler.media.core.AbstractMediaOrganizer;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import org.drombler.event.core.Event;
 import org.drombler.identity.core.DromblerId;
 import org.drombler.identity.core.DromblerUserId;
-import org.drombler.media.core.photo.PhotoStorage;
-import org.drombler.media.core.video.VideoStorage;
 
 /**
  * Organizes Files from Panasonic import for Synology import.
