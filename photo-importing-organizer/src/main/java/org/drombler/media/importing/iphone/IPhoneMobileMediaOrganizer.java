@@ -3,16 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.drombler.media.importing.threema;
+package org.drombler.media.importing.iphone;
 
 import org.drombler.media.core.AbstractMediaOrganizer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.drombler.identity.core.DromblerId;
@@ -23,27 +21,26 @@ import org.drombler.identity.core.DromblerUserId;
  *
  * @author Florian
  */
-public class ThreemaMediaOrganizer extends AbstractMediaOrganizer {
-
-    private static final Pattern RAW_DATE_PATTERN = Pattern.compile("\\d+(\\d{13}).*");
+public class IPhoneMobileMediaOrganizer extends AbstractMediaOrganizer {
 
     public static void main(String[] args) throws IOException {
         Path baseDirPath = Paths.get("\\\\diskstation\\photo\\Puce-Mobile");
-        DromblerId defaultDromblerId = new DromblerUserId("unknown");
 
-        ThreemaMediaOrganizer organizer = new ThreemaMediaOrganizer(Paths.get("media-event-dir-paths.txt"));
+        DromblerId defaultDromblerId = new DromblerUserId("puce");
+
+        IPhoneMobileMediaOrganizer organizer = new IPhoneMobileMediaOrganizer(Paths.get("media-event-dir-paths.txt"));
         organizer.organize(baseDirPath, defaultDromblerId);
     }
 
-    public ThreemaMediaOrganizer(Path mediaEventDirPathsFilePath) throws IOException {
+    private static final Pattern RAW_DATE_PATTERN = Pattern.compile("IMG_(\\d{8}_\\d{6})\\..*");
+    private static final DateTimeFormatter RAW_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+
+    public IPhoneMobileMediaOrganizer(Path mediaEventDirPathsFilePath) throws IOException {
         super(mediaEventDirPathsFilePath, RAW_DATE_PATTERN, false);
     }
-    
+
     @Override
-    protected LocalDate getDate(final Matcher matcher) throws NumberFormatException {
-        Instant instant = Instant.ofEpochMilli(Long.parseLong(matcher.group(1)));
-        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
-        LocalDate date = zdt.toLocalDate();
-        return date;
+    protected LocalDate getDate(Matcher matcher) {
+        return RAW_DATE_FORMATTER.parse(matcher.group(1), LocalDate::from);
     }
 }
