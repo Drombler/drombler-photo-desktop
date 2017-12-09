@@ -14,8 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.drombler.identity.core.DromblerId;
 import org.drombler.identity.core.DromblerUserId;
+import org.drombler.media.importing.iphone.IPhoneMobileMediaOrganizer;
 import org.drombler.media.importing.samsung.galaxy.SamsungMobileMediaOrganizer;
-import org.drombler.media.importing.threema.ThreemaMediaOrganizer;
+import org.drombler.media.importing.samsung.galaxy.ThreemaMediaOrganizer;
 
 /**
  *
@@ -42,7 +43,10 @@ public class MediaImporter {
         DromblerId defaultDromblerId = new DromblerUserId("unknown");
 
         return Arrays.asList(
-                new MediaImportJob(puceMobileDirPath, puceDromblerId, new SamsungMobileMediaOrganizer(mediaEventDirPathsFilePath)),
-                new MediaImportJob(puceMobileDirPath, defaultDromblerId, new ThreemaMediaOrganizer(mediaEventDirPathsFilePath)));
+//                new MediaImportJob(puceMobileDirPath, puceDromblerId, new SamsungMobileMediaOrganizer(mediaEventDirPathsFilePath)),
+//                new MediaImportJob(puceMobileDirPath, defaultDromblerId, new ThreemaMediaOrganizer(mediaEventDirPathsFilePath)),
+                new MediaImportJob(puceMobileDirPath, puceDromblerId, new IPhoneMobileMediaOrganizer(mediaEventDirPathsFilePath))
+        );
+
     }
 }

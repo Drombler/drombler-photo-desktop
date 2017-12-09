@@ -74,6 +74,7 @@ public abstract class AbstractMediaOrganizer {
         if (!Files.exists(targetDirPath)) {
             Files.createDirectories(targetDirPath);
         }
+        // TODO: check the events dirs before enabling the next line. They were not correct the last time
         Files.move(filePath, targetDirPath.resolve(filePath.getFileName()));
     }
 
@@ -156,10 +157,10 @@ public abstract class AbstractMediaOrganizer {
     private void moveFile(Path filePath, DromblerId dromblerId, PhotoStorage photoStorage, VideoStorage videoStorage) throws IOException {
         Event event = getFirstEvent(directories ? filePath.getParent() : filePath);
         Path photoDir = photoStorage.getMediaEventDirPath(event, dromblerId);
-        System.out.println(photoDir);
+//        System.out.println("dst: "+photoDir);
         Path videoDir = videoStorage.getMediaEventDirPath(event, dromblerId);
-        System.out.println(videoDir);
-        System.out.println(filePath);
+//        System.out.println("dst: "+videoDir);
+        System.out.println("src: "+filePath);
         try {
             if (photoStorage.isSupportedByFileExtension(filePath.getFileName().toString())) {
                 moveFile(filePath, photoDir);

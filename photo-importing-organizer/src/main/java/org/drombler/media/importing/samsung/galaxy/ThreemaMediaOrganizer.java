@@ -9,8 +9,10 @@ import org.drombler.media.core.AbstractMediaOrganizer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.drombler.identity.core.DromblerId;
@@ -21,26 +23,27 @@ import org.drombler.identity.core.DromblerUserId;
  *
  * @author Florian
  */
-public class SamsungMobileMediaOrganizer extends AbstractMediaOrganizer {
+public class ThreemaMediaOrganizer extends AbstractMediaOrganizer {
+
+    private static final Pattern RAW_DATE_PATTERN = Pattern.compile("\\d+(\\d{13}).*");
 
     public static void main(String[] args) throws IOException {
         Path baseDirPath = Paths.get("\\\\diskstation\\photo\\Puce-Mobile");
+        DromblerId defaultDromblerId = new DromblerUserId("unknown");
 
-        DromblerId defaultDromblerId = new DromblerUserId("puce");
-
-        SamsungMobileMediaOrganizer organizer = new SamsungMobileMediaOrganizer(Paths.get("media-event-dir-paths.txt"));
+        ThreemaMediaOrganizer organizer = new ThreemaMediaOrganizer(Paths.get("media-event-dir-paths.txt"));
         organizer.organize(baseDirPath, defaultDromblerId);
     }
 
-    private static final Pattern RAW_DATE_PATTERN = Pattern.compile("(\\d{8}_\\d{6})\\..*");
-    private static final DateTimeFormatter RAW_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-
-    public SamsungMobileMediaOrganizer(Path mediaEventDirPathsFilePath) throws IOException {
+    public ThreemaMediaOrganizer(Path mediaEventDirPathsFilePath) throws IOException {
         super(mediaEventDirPathsFilePath, RAW_DATE_PATTERN, false);
     }
-
+    
     @Override
-    protected LocalDate getDate(Matcher matcher) {
-        return RAW_DATE_FORMATTER.parse(matcher.group(1), LocalDate::from);
+    protected LocalDate getDate(final Matcher matcher) throws NumberFormatException {
+        Instant instant = Instant.ofEpochMilli(Long.parseLong(matcher.group(1)));
+        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+        LocalDate date = zdt.toLocalDate();
+        return date;
     }
 }
