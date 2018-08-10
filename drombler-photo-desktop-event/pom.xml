@@ -7,10 +7,10 @@
         <version>1.0-SNAPSHOT</version>
         <relativePath>../drombler-photo-desktop-parent/pom.xml</relativePath>
     </parent>
-    <artifactId>drombler-photo-desktop-sample</artifactId>
+    <artifactId>drombler-photo-desktop-event</artifactId>
     <packaging>bundle</packaging>
 
-    <name>drombler-photo-desktop-sample</name>
+    <name>drombler-photo-desktop-event</name>
 
     <!-- Not inherited!?? -->
     <prerequisites>

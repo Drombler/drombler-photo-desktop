@@ -23,3 +23,6 @@
 hs_err_pid*
 /target/
 /drombler-photo-desktop-application/target/
+/target/
+/drombler-photo-desktop-application/target/
+/drombler-photo-desktop-event/target/

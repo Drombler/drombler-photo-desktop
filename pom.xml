@@ -21,6 +21,6 @@
     <modules>
         <module>drombler-photo-desktop-parent</module>
         <module>drombler-photo-desktop-application</module>
-        <module>drombler-photo-desktop-sample</module>
+        <module>drombler-photo-desktop-event</module>
     </modules>
 </project>
