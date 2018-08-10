@@ -29,6 +29,11 @@
     
     <dependencies>
         <dependency>
+            <groupId>org.drombler.media</groupId>
+            <artifactId>drombler-media-importer</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.drombler.fx</groupId>
             <artifactId>drombler-fx-core-docking</artifactId>
         </dependency>
@@ -47,6 +52,23 @@
         <dependency>
             <groupId>org.drombler.acp</groupId>
             <artifactId>drombler-acp-core-docking-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.drombler.commons</groupId>
+            <artifactId>drombler-commons-data-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.drombler.commons</groupId>
+            <artifactId>drombler-commons-data-fx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.drombler.commons</groupId>
+            <artifactId>drombler-commons-action-fx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

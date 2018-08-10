@@ -22,6 +22,5 @@
         <module>drombler-photo-desktop-parent</module>
         <module>drombler-photo-desktop-application</module>
         <module>drombler-photo-desktop-sample</module>
-        <module>photo-importing-organizer</module>
     </modules>
 </project>

@@ -12,7 +12,32 @@
 
     <name>drombler-photo-desktop-application</name>
 
-    <build>
+    <properties>
+        <additionalExecArgs></additionalExecArgs>
+    </properties>
+    
+    <build><pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <executions> 
+                        <execution>
+                            <id>default-cli</id>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <commandlineArgs>${additionalExecArgs} -Duser.language=en -Duser.country=US -Djavafx.verbose=true -Dprism.verbose=true -Dbinary.css=false -Djava.util.logging.config.file=conf/logging.properties -jar "bin/drombler-photo-desktop.jar" --userdir "${project.build.directory}/userdir"</commandlineArgs>
+                                <executable>java</executable>
+                                <workingDirectory>${project.build.directory}/deployment/standalone</workingDirectory>
+                                <classpathScope>runtime</classpathScope>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>  
                 <groupId>org.drombler.fx</groupId>
@@ -20,7 +45,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <brandingId>drombler-photo-desktop</brandingId>
-                    <title>MyApplication ${project.version}</title>
+                    <title>Drombler Photo ${project.version}</title>
                     <width>1500</width>
                     <height>1000</height>
                 </configuration>
@@ -39,40 +64,62 @@
         
  
         <dependency> 
-            <!-- Provides the JavaFX Application integration. 
-            You could omit this direct dependency as long as it stays a transitive dependency. 
-            (E.g. if you use drombler-fx-core-docking) -->
+            <!-- Configures the provided content of the JavaFX Application. -->
             <groupId>org.drombler.fx</groupId>
             <artifactId>drombler-fx-core-application</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <!--  Provides JavaFX based implementations of the Docking Framework 
+            <!--  Provides a classic desktop application layout with a menubar, a toolbar, a status bar and a content area 
+            as the content of the JavaFX Application. 
+            You could replace this with your own definition of the application layout by providing an implementation
+            of MainSceneRootProvider and registering it as an OSGi service. -->
+            <groupId>org.drombler.fx</groupId>
+            <artifactId>drombler-fx-core-standard-desktop-classic</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <!-- Provides JavaFX-based standard status bar elements such as a ProgressMonitor. -->
+            <groupId>org.drombler.fx</groupId>
+            <artifactId>drombler-fx-core-standard-status</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <!--  Provides a JavaFX based implementation of the Docking Framework for the content area of the classic
+            desktop application layout.
             You could omit this dependency as long as it is a transitive dependency. 
-            (E.g. if you use a project such as drombler-photo-desktop-sample, which provides some DockingPanes) -->
+            (E.g. if you use a project such as \${rootArtifactId}-sample, which provides some DockingPanes) 
+            You could also replace this with your own implementation of the ApplicationContentProvider and register
+            it as an OSGi service.-->
             <groupId>org.drombler.fx</groupId>
             <artifactId>drombler-fx-core-docking</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <!-- Provides the standard Docking Areas: left, right, top, bottom and center
+            <!-- Provides the standard Docking Areas: left, right, top, bottom and editor
             You could replace this with your own definition of these Docking Areas. -->
             <groupId>org.drombler.acp</groupId>
             <artifactId>drombler-acp-core-standard-docking</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- Provides the standard actions, toolbar buttons and menu items such as "Save" and "Save All" -->
+        <dependency>
+            <groupId>org.drombler.acp</groupId>
+            <artifactId>drombler-acp-core-standard-action</artifactId>
+            <scope>runtime</scope>
+        </dependency>  
+        <!-- Provides the standard file based actions, toolbar buttons and menu items such as "Open" -->
+        <dependency>
+            <groupId>org.drombler.acp</groupId>
+            <artifactId>drombler-acp-core-standard-action-data-file</artifactId>
+            <scope>runtime</scope>
+        </dependency>  
         <dependency>
             <!-- Provides some localized resources. -->
             <groupId>org.drombler.fx</groupId>
-            <artifactId>drombler-fx-locale-all</artifactId>
+            <artifactId>drombler-fx-l10n-all</artifactId>
             <type>pom</type>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>runtime</scope>
-            <!-- Seems to be necessary for org.apache.felix:org.apache.felix.scr:1.6.0-->
         </dependency>
         
         <!-- Replace with any SLF4J binding you like-->
@@ -83,4 +130,42 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
+    
+     <profiles>
+        <profile>
+            <id>debug</id>
+            <properties>
+                <additionalExecArgs>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=\${jpda.address}</additionalExecArgs>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.gogo.shell</artifactId>
+                    <version>0.10.0</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.gogo.command</artifactId>
+                    <version>0.14.0</version>
+                    <scope>runtime</scope>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.osgi</groupId>
+                            <artifactId>org.osgi.core</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                    <version>0.16.2</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
