@@ -4,6 +4,6 @@
  * and open the template in the editor.
  */
 
-package org.drombler.photo.fx.desktop.sample.impl;
+package org.drombler.photo.fx.desktop.event.impl;
 
 

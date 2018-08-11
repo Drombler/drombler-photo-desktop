@@ -55,9 +55,9 @@
     
     <dependencies>      
         <dependency>
-            <!-- Provides the sample -->
+            <!-- Provides the event support -->
             <groupId>org.drombler.photo.fx.desktop</groupId>
-            <artifactId>drombler-photo-desktop-sample</artifactId>
+            <artifactId>drombler-photo-desktop-event</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

@@ -1,4 +1,4 @@
-package org.drombler.photo.fx.desktop.sample;
+package org.drombler.photo.fx.desktop.event;
 
 import java.util.UUID;
 import org.drombler.acp.core.data.AbstractDataHandler;
