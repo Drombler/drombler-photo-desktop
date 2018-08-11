@@ -33,4 +33,11 @@ public class EventDataHandler extends AbstractDataHandler<UUID> {
         return event.getId();
     }
 
+    /**
+     * @return the event
+     */
+    public Event getEvent() {
+        return event;
+    }
+
 }

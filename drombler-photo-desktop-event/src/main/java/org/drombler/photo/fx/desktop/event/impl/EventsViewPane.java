@@ -1,6 +1,10 @@
 package org.drombler.photo.fx.desktop.event.impl;
 
+import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.drombler.commons.data.fx.DataHandlerRenderer;
 import org.drombler.commons.fx.scene.control.RenderedTreeCellFactory;
@@ -9,6 +13,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
+import org.apache.commons.lang3.ClassUtils;
 import org.drombler.acp.core.commons.util.SimpleServiceTrackerCustomizer;
 import org.drombler.acp.core.data.spi.DataHandlerDescriptorRegistryProvider;
 import org.drombler.acp.core.data.spi.DataHandlerRegistryProvider;
@@ -18,7 +23,10 @@ import org.drombler.acp.core.docking.ViewDocking;
 import org.drombler.acp.core.docking.WindowMenuEntry;
 import org.drombler.commons.data.DataHandler;
 import org.drombler.commons.fx.concurrent.FXConsumer;
+import org.drombler.commons.fx.scene.renderer.DataRenderer;
+import org.drombler.commons.fx.scene.renderer.time.YearRenderer;
 import org.drombler.event.core.Event;
+import org.drombler.event.core.FullTimeEventDuration;
 import org.drombler.photo.fx.desktop.event.EventDataHandler;
 import org.drombler.photo.fx.desktop.event.EventManagerClientProvider;
 
@@ -36,14 +44,14 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
     private final ServiceTracker<EventManagerClientProvider, EventManagerClientProvider> eventManagerClientProviderServiceTracker;
     private DataHandlerDescriptorRegistryProvider dataHandlerDescriptorRegistryProvider;
     private EventManagerClientProvider eventManagerClientProvider;
-    private TreeView<DataHandler<?>> eventsTreeView;
+    private TreeView<Object> eventsTreeView;
 
     public EventsViewPane() {
-        TreeItem<DataHandler<?>> rootItem = new TreeItem<>();
+        TreeItem<Object> rootItem = new TreeItem<>();
         rootItem.setExpanded(true);
 
         this.eventsTreeView = new TreeView<>(rootItem);
-
+        eventsTreeView.setShowRoot(false);
         setCenter(eventsTreeView);
         this.dataHandlerDescriptorRegistryProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(DataHandlerDescriptorRegistryProvider.class, new FXConsumer<>(this::setDataHandlerDescriptorRegistryProvider));
         this.dataHandlerDescriptorRegistryProviderServiceTracker.open(true);
@@ -65,7 +73,11 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
     public void setDataHandlerDescriptorRegistryProvider(DataHandlerDescriptorRegistryProvider dataHandlerDescriptorRegistryProvider) {
         this.dataHandlerDescriptorRegistryProvider = dataHandlerDescriptorRegistryProvider;
         if (dataHandlerDescriptorRegistryProvider != null) {
-            eventsTreeView.setCellFactory(new RenderedTreeCellFactory<>(new DataHandlerRenderer(this.dataHandlerDescriptorRegistryProvider.getDataHandlerDescriptorRegistry(), 16)));
+            RenderedTreeCellFactory<Object> renderedTreeCellFactory = new RenderedTreeCellFactory<>();
+            DataRenderer<DataHandler<?>> dataHandlerRenderer = new DataHandlerRenderer(this.dataHandlerDescriptorRegistryProvider.getDataHandlerDescriptorRegistry(), 16);
+            renderedTreeCellFactory.registerDataRenderer((Class<DataHandler<?>>) (Class<?>) DataHandler.class, dataHandlerRenderer);
+            renderedTreeCellFactory.registerDataRenderer(Year.class, new YearRenderer());
+            eventsTreeView.setCellFactory(renderedTreeCellFactory);
         } else {
             eventsTreeView.setCellFactory(null);
         }
@@ -84,13 +96,34 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
     public void setEventManagerClientProvider(EventManagerClientProvider eventManagerClientProvider) {
         this.eventManagerClientProvider = eventManagerClientProvider;
         if (eventManagerClientProvider != null) {
-            List<TreeItem<DataHandler<?>>> eventDataHandlerTreeItems = eventManagerClientProvider.getEventManagerClient().getAllEvents().stream()
-                    .map(eventDataHandler -> new TreeItem<DataHandler<?>>(eventDataHandler))
+            List<EventDataHandler> eventDataHandlers = eventManagerClientProvider.getEventManagerClient().getAllEvents();
+            SortedMap<Year, List<EventDataHandler>> eventHandlersGroupedByYear = groupEventsByYear(eventDataHandlers);
+            List<TreeItem<Object>> yearTreeItems = eventHandlersGroupedByYear.entrySet().stream()
+                    .map(entry -> {
+                        TreeItem<Object> yearTreeItem = new TreeItem<>(entry.getKey());
+                        List<TreeItem<Object>> eventDataHandlerTreeItems = entry.getValue().stream()
+                                .map(eventDataHandler -> new TreeItem<Object>(eventDataHandler))
+                                .collect(Collectors.toList());
+                        yearTreeItem.getChildren().addAll(eventDataHandlerTreeItems);
+                        return yearTreeItem;
+                    })
                     .collect(Collectors.toList());
-            eventsTreeView.getRoot().getChildren().addAll(eventDataHandlerTreeItems);
+            eventsTreeView.getRoot().getChildren().addAll(yearTreeItems);
         } else {
             eventsTreeView.getRoot().getChildren().clear();
         }
+    }
+
+    private SortedMap<Year, List<EventDataHandler>> groupEventsByYear(List<EventDataHandler> eventDataHandlers) {
+        SortedMap<Year, List<EventDataHandler>> eventHandlersGroupedByYear = new TreeMap<>();
+        eventDataHandlers.forEach(eventDataHandler -> {
+            Year year = Year.of(((FullTimeEventDuration) eventDataHandler.getEvent().getDuration()).getStartDateInclusive().getYear());
+            if (!eventHandlersGroupedByYear.containsKey(year)) {
+                eventHandlersGroupedByYear.put(year, new ArrayList<>());
+            }
+            eventHandlersGroupedByYear.get(year).add(eventDataHandler);
+        });
+        return eventHandlersGroupedByYear;
     }
 
     @Override
