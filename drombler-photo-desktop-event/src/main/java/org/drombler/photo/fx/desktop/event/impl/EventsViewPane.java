@@ -98,6 +98,18 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
         }
     }
 
+    private SortedMap<Year, List<EventDataHandler>> groupEventsByYear(List<EventDataHandler> eventDataHandlers) {
+        SortedMap<Year, List<EventDataHandler>> eventHandlersGroupedByYear = new TreeMap<>();
+        eventDataHandlers.forEach(eventDataHandler -> {
+            Year year = Year.of(((FullTimeEventDuration) eventDataHandler.getEvent().getDuration()).getStartDateInclusive().getYear());
+            if (!eventHandlersGroupedByYear.containsKey(year)) {
+                eventHandlersGroupedByYear.put(year, new ArrayList<>());
+            }
+            eventHandlersGroupedByYear.get(year).add(eventDataHandler);
+        });
+        return eventHandlersGroupedByYear;
+    }
+
     @Override
     public void close() {
         dataHandlerDescriptorRegistryProviderServiceTracker.close();
