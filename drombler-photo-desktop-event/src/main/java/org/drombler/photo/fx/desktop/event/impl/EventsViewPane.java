@@ -3,6 +3,7 @@ package org.drombler.photo.fx.desktop.event.impl;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import org.drombler.acp.core.docking.WindowMenuEntry;
 import org.drombler.commons.data.DataHandler;
 import org.drombler.commons.fx.concurrent.FXConsumer;
 import org.drombler.commons.fx.scene.renderer.DataRenderer;
+import org.drombler.commons.fx.scene.renderer.ObjectRenderer;
 import org.drombler.commons.fx.scene.renderer.time.YearRenderer;
 import org.drombler.event.core.Event;
 import org.drombler.event.core.FullTimeEventDuration;
@@ -99,19 +101,25 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
             List<EventDataHandler> eventDataHandlers = eventManagerClientProvider.getEventManagerClient().getAllEvents();
             SortedMap<Year, List<EventDataHandler>> eventHandlersGroupedByYear = groupEventsByYear(eventDataHandlers);
             List<TreeItem<Object>> yearTreeItems = eventHandlersGroupedByYear.entrySet().stream()
-                    .map(entry -> {
-                        TreeItem<Object> yearTreeItem = new TreeItem<>(entry.getKey());
-                        List<TreeItem<Object>> eventDataHandlerTreeItems = entry.getValue().stream()
-                                .map(eventDataHandler -> new TreeItem<Object>(eventDataHandler))
-                                .collect(Collectors.toList());
-                        yearTreeItem.getChildren().addAll(eventDataHandlerTreeItems);
-                        return yearTreeItem;
-                    })
+                    .map(this::createYearTreeItem)
                     .collect(Collectors.toList());
             eventsTreeView.getRoot().getChildren().addAll(yearTreeItems);
         } else {
             eventsTreeView.getRoot().getChildren().clear();
         }
+    }
+
+    private TreeItem<Object> createYearTreeItem(Map.Entry<Year, List<EventDataHandler>> entry) {
+        return createYearTreeItem(entry.getKey(), entry.getValue());
+    }
+
+    private TreeItem<Object> createYearTreeItem(final Year year, final List<EventDataHandler> handlers) {
+        TreeItem<Object> yearTreeItem = new TreeItem<>(year);
+        List<TreeItem<Object>> eventDataHandlerTreeItems = handlers.stream()
+                .map(this::createEventDataHandlerTreeItem)
+                .collect(Collectors.toList());
+        yearTreeItem.getChildren().addAll(eventDataHandlerTreeItems);
+        return yearTreeItem;
     }
 
     private SortedMap<Year, List<EventDataHandler>> groupEventsByYear(List<EventDataHandler> eventDataHandlers) {
@@ -124,6 +132,22 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
             eventHandlersGroupedByYear.get(year).add(eventDataHandler);
         });
         return eventHandlersGroupedByYear;
+    }
+
+    private TreeItem<Object> createEventDataHandlerTreeItem(EventDataHandler eventDataHandler) {
+        TreeItem<Object> eventDataHandlerTreeItem = new TreeItem<>(eventDataHandler);
+        eventDataHandlerTreeItem.getChildren().addAll(createEventPhotoSectionTreeItem(), createEventVideoSectionTreeItem());
+        return eventDataHandlerTreeItem;
+    }
+
+    private TreeItem<Object> createEventPhotoSectionTreeItem() {
+        TreeItem<Object> eventPhotoSectionTreeItem = new TreeItem<>("photo");
+        return eventPhotoSectionTreeItem;
+    }
+
+    private TreeItem<Object> createEventVideoSectionTreeItem() {
+        TreeItem<Object> eventVideoSectionTreeItem = new TreeItem<>("video");
+        return eventVideoSectionTreeItem;
     }
 
     @Override
