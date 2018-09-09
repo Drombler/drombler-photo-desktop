@@ -98,47 +98,6 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
         }
     }
 
-    private TreeItem<Object> createYearTreeItem(Map.Entry<Year, List<EventDataHandler>> entry) {
-        return createYearTreeItem(entry.getKey(), entry.getValue());
-    }
-
-    private TreeItem<Object> createYearTreeItem(final Year year, final List<EventDataHandler> handlers) {
-        TreeItem<Object> yearTreeItem = new TreeItem<>(year);
-        List<TreeItem<Object>> eventDataHandlerTreeItems = handlers.stream()
-                .map(this::createEventDataHandlerTreeItem)
-                .collect(Collectors.toList());
-        yearTreeItem.getChildren().addAll(eventDataHandlerTreeItems);
-        return yearTreeItem;
-    }
-
-    private SortedMap<Year, List<EventDataHandler>> groupEventsByYear(List<EventDataHandler> eventDataHandlers) {
-        SortedMap<Year, List<EventDataHandler>> eventHandlersGroupedByYear = new TreeMap<>();
-        eventDataHandlers.forEach(eventDataHandler -> {
-            Year year = Year.of(((FullTimeEventDuration) eventDataHandler.getEvent().getDuration()).getStartDateInclusive().getYear());
-            if (!eventHandlersGroupedByYear.containsKey(year)) {
-                eventHandlersGroupedByYear.put(year, new ArrayList<>());
-            }
-            eventHandlersGroupedByYear.get(year).add(eventDataHandler);
-        });
-        return eventHandlersGroupedByYear;
-    }
-
-    private TreeItem<Object> createEventDataHandlerTreeItem(EventDataHandler eventDataHandler) {
-        TreeItem<Object> eventDataHandlerTreeItem = new TreeItem<>(eventDataHandler);
-        eventDataHandlerTreeItem.getChildren().addAll(createEventPhotoSectionTreeItem(), createEventVideoSectionTreeItem());
-        return eventDataHandlerTreeItem;
-    }
-
-    private TreeItem<Object> createEventPhotoSectionTreeItem() {
-        TreeItem<Object> eventPhotoSectionTreeItem = new TreeItem<>("photo");
-        return eventPhotoSectionTreeItem;
-    }
-
-    private TreeItem<Object> createEventVideoSectionTreeItem() {
-        TreeItem<Object> eventVideoSectionTreeItem = new TreeItem<>("video");
-        return eventVideoSectionTreeItem;
-    }
-
     @Override
     public void close() {
         dataHandlerDescriptorRegistryProviderServiceTracker.close();
