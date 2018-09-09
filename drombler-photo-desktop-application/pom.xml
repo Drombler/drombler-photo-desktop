@@ -16,7 +16,8 @@
         <additionalExecArgs></additionalExecArgs>
     </properties>
     
-    <build><pluginManagement>
+    <build>
+        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -61,7 +62,27 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
+        <dependency>
+            <!-- Provides the media core support -->
+            <groupId>org.drombler.photo.fx.desktop</groupId>
+            <artifactId>drombler-photo-desktop-media-core</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <!-- Provides the photo support -->
+            <groupId>org.drombler.photo.fx.desktop</groupId>
+            <artifactId>drombler-photo-desktop-media-photo</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <!-- Provides the video support -->
+            <groupId>org.drombler.photo.fx.desktop</groupId>
+            <artifactId>drombler-photo-desktop-media-video</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
  
         <dependency> 
             <!-- Configures the provided content of the JavaFX Application. -->
@@ -131,11 +152,11 @@
         </dependency>
     </dependencies>
     
-     <profiles>
+    <profiles>
         <profile>
             <id>debug</id>
             <properties>
-                <additionalExecArgs>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=\${jpda.address}</additionalExecArgs>
+                <additionalExecArgs>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</additionalExecArgs>
             </properties>
         </profile>
         <profile>

@@ -31,6 +31,7 @@ import org.drombler.event.core.Event;
 import org.drombler.event.core.FullTimeEventDuration;
 import org.drombler.photo.fx.desktop.event.EventDataHandler;
 import org.drombler.photo.fx.desktop.event.EventManagerClientProvider;
+import org.drombler.photo.fx.desktop.event.EventsTreePane;
 
 /**
  *
@@ -46,15 +47,11 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
     private final ServiceTracker<EventManagerClientProvider, EventManagerClientProvider> eventManagerClientProviderServiceTracker;
     private DataHandlerDescriptorRegistryProvider dataHandlerDescriptorRegistryProvider;
     private EventManagerClientProvider eventManagerClientProvider;
-    private TreeView<Object> eventsTreeView;
+    private EventsTreePane eventsTreePane = new EventsTreePane();
 
     public EventsViewPane() {
-        TreeItem<Object> rootItem = new TreeItem<>();
-        rootItem.setExpanded(true);
+        setCenter(eventsTreePane);
 
-        this.eventsTreeView = new TreeView<>(rootItem);
-        eventsTreeView.setShowRoot(false);
-        setCenter(eventsTreeView);
         this.dataHandlerDescriptorRegistryProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(DataHandlerDescriptorRegistryProvider.class, new FXConsumer<>(this::setDataHandlerDescriptorRegistryProvider));
         this.dataHandlerDescriptorRegistryProviderServiceTracker.open(true);
         this.eventManagerClientProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(EventManagerClientProvider.class, new FXConsumer<>(this::setEventManagerClientProvider));
@@ -75,13 +72,9 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
     public void setDataHandlerDescriptorRegistryProvider(DataHandlerDescriptorRegistryProvider dataHandlerDescriptorRegistryProvider) {
         this.dataHandlerDescriptorRegistryProvider = dataHandlerDescriptorRegistryProvider;
         if (dataHandlerDescriptorRegistryProvider != null) {
-            RenderedTreeCellFactory<Object> renderedTreeCellFactory = new RenderedTreeCellFactory<>();
-            DataRenderer<DataHandler<?>> dataHandlerRenderer = new DataHandlerRenderer(this.dataHandlerDescriptorRegistryProvider.getDataHandlerDescriptorRegistry(), 16);
-            renderedTreeCellFactory.registerDataRenderer((Class<DataHandler<?>>) (Class<?>) DataHandler.class, dataHandlerRenderer);
-            renderedTreeCellFactory.registerDataRenderer(Year.class, new YearRenderer());
-            eventsTreeView.setCellFactory(renderedTreeCellFactory);
+            eventsTreePane.setDataHandlerDescriptorRegistry(this.dataHandlerDescriptorRegistryProvider.getDataHandlerDescriptorRegistry());
         } else {
-            eventsTreeView.setCellFactory(null);
+            eventsTreePane.setDataHandlerDescriptorRegistry(null);
         }
     }
 
@@ -99,55 +92,10 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
         this.eventManagerClientProvider = eventManagerClientProvider;
         if (eventManagerClientProvider != null) {
             List<EventDataHandler> eventDataHandlers = eventManagerClientProvider.getEventManagerClient().getAllEvents();
-            SortedMap<Year, List<EventDataHandler>> eventHandlersGroupedByYear = groupEventsByYear(eventDataHandlers);
-            List<TreeItem<Object>> yearTreeItems = eventHandlersGroupedByYear.entrySet().stream()
-                    .map(this::createYearTreeItem)
-                    .collect(Collectors.toList());
-            eventsTreeView.getRoot().getChildren().addAll(yearTreeItems);
+            eventsTreePane.getEvents().addAll(eventDataHandlers);
         } else {
-            eventsTreeView.getRoot().getChildren().clear();
+            eventsTreePane.getEvents().clear();
         }
-    }
-
-    private TreeItem<Object> createYearTreeItem(Map.Entry<Year, List<EventDataHandler>> entry) {
-        return createYearTreeItem(entry.getKey(), entry.getValue());
-    }
-
-    private TreeItem<Object> createYearTreeItem(final Year year, final List<EventDataHandler> handlers) {
-        TreeItem<Object> yearTreeItem = new TreeItem<>(year);
-        List<TreeItem<Object>> eventDataHandlerTreeItems = handlers.stream()
-                .map(this::createEventDataHandlerTreeItem)
-                .collect(Collectors.toList());
-        yearTreeItem.getChildren().addAll(eventDataHandlerTreeItems);
-        return yearTreeItem;
-    }
-
-    private SortedMap<Year, List<EventDataHandler>> groupEventsByYear(List<EventDataHandler> eventDataHandlers) {
-        SortedMap<Year, List<EventDataHandler>> eventHandlersGroupedByYear = new TreeMap<>();
-        eventDataHandlers.forEach(eventDataHandler -> {
-            Year year = Year.of(((FullTimeEventDuration) eventDataHandler.getEvent().getDuration()).getStartDateInclusive().getYear());
-            if (!eventHandlersGroupedByYear.containsKey(year)) {
-                eventHandlersGroupedByYear.put(year, new ArrayList<>());
-            }
-            eventHandlersGroupedByYear.get(year).add(eventDataHandler);
-        });
-        return eventHandlersGroupedByYear;
-    }
-
-    private TreeItem<Object> createEventDataHandlerTreeItem(EventDataHandler eventDataHandler) {
-        TreeItem<Object> eventDataHandlerTreeItem = new TreeItem<>(eventDataHandler);
-        eventDataHandlerTreeItem.getChildren().addAll(createEventPhotoSectionTreeItem(), createEventVideoSectionTreeItem());
-        return eventDataHandlerTreeItem;
-    }
-
-    private TreeItem<Object> createEventPhotoSectionTreeItem() {
-        TreeItem<Object> eventPhotoSectionTreeItem = new TreeItem<>("photo");
-        return eventPhotoSectionTreeItem;
-    }
-
-    private TreeItem<Object> createEventVideoSectionTreeItem() {
-        TreeItem<Object> eventVideoSectionTreeItem = new TreeItem<>("video");
-        return eventVideoSectionTreeItem;
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.drombler.acp.core.data.spi.DataHandlerRegistryProvider;
 import org.drombler.commons.action.AbstractActionListener;
 import org.drombler.commons.client.dialog.DirectoryChooserProvider;
 import org.drombler.commons.data.Openable;
+
 import org.drombler.media.core.photo.PhotoStorage;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.util.tracker.ServiceTracker;
