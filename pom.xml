@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.drombler.photo.fx.desktop</groupId>
+        <artifactId>drombler-photo-desktop-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>drombler-photo-desktop-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>drombler-photo-desktop</artifactId>
+    <packaging>pom</packaging>
+
+    <name>drombler-photo-desktop</name>
+
+
+    <!-- Not inherited!?? -->
+    <prerequisites>
+        <maven>${maven.version}</maven>
+    </prerequisites>
+    
+    <modules>
+        <module>drombler-photo-desktop-parent</module>
+        <module>drombler-photo-desktop-application</module>
+        <module>drombler-photo-desktop-event</module>
+        <module>drombler-photo-desktop-media-core</module>
+        <module>drombler-photo-desktop-media-photo</module>
+        <module>drombler-photo-desktop-media-video</module>
+    </modules>
+</project>

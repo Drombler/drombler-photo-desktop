@@ -1,0 +1,107 @@
+package org.drombler.photo.fx.desktop.event.impl;
+
+import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import org.drombler.commons.data.fx.DataHandlerRenderer;
+import org.drombler.commons.fx.scene.control.RenderedTreeCellFactory;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
+import javafx.util.Callback;
+import org.apache.commons.lang3.ClassUtils;
+import org.drombler.acp.core.commons.util.SimpleServiceTrackerCustomizer;
+import org.drombler.acp.core.data.spi.DataHandlerDescriptorRegistryProvider;
+import org.drombler.acp.core.data.spi.DataHandlerRegistryProvider;
+import org.osgi.util.tracker.ServiceTracker;
+
+import org.drombler.acp.core.docking.ViewDocking;
+import org.drombler.acp.core.docking.WindowMenuEntry;
+import org.drombler.commons.data.DataHandler;
+import org.drombler.commons.fx.concurrent.FXConsumer;
+import org.drombler.commons.fx.scene.renderer.DataRenderer;
+import org.drombler.commons.fx.scene.renderer.ObjectRenderer;
+import org.drombler.commons.fx.scene.renderer.time.YearRenderer;
+import org.drombler.event.core.Event;
+import org.drombler.event.core.FullTimeEventDuration;
+import org.drombler.photo.fx.desktop.event.EventDataHandler;
+import org.drombler.photo.fx.desktop.event.EventManagerClientProvider;
+import org.drombler.photo.fx.desktop.event.EventsTreePane;
+
+/**
+ *
+ * @author Florian
+ */
+@ViewDocking(areaId = "left", position = 10, displayName = "%displayName", // icon = "top-test-pane.png",
+        accelerator = "Shortcut+e",
+        menuEntry
+        = @WindowMenuEntry(path = "", position = 20))
+public class EventsViewPane extends BorderPane implements AutoCloseable {
+
+    private final ServiceTracker<DataHandlerDescriptorRegistryProvider, DataHandlerDescriptorRegistryProvider> dataHandlerDescriptorRegistryProviderServiceTracker;
+    private final ServiceTracker<EventManagerClientProvider, EventManagerClientProvider> eventManagerClientProviderServiceTracker;
+    private DataHandlerDescriptorRegistryProvider dataHandlerDescriptorRegistryProvider;
+    private EventManagerClientProvider eventManagerClientProvider;
+    private EventsTreePane eventsTreePane = new EventsTreePane();
+
+    public EventsViewPane() {
+        setCenter(eventsTreePane);
+
+        this.dataHandlerDescriptorRegistryProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(DataHandlerDescriptorRegistryProvider.class, new FXConsumer<>(this::setDataHandlerDescriptorRegistryProvider));
+        this.dataHandlerDescriptorRegistryProviderServiceTracker.open(true);
+        this.eventManagerClientProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(EventManagerClientProvider.class, new FXConsumer<>(this::setEventManagerClientProvider));
+        this.eventManagerClientProviderServiceTracker.open(true);
+    }
+
+    /**
+     * @return the dataHandlerDescriptorRegistryProvider
+     */
+    public DataHandlerDescriptorRegistryProvider getDataHandlerDescriptorRegistryProvider() {
+        return dataHandlerDescriptorRegistryProvider;
+    }
+
+    /**
+     * @param dataHandlerDescriptorRegistryProvider the
+     * dataHandlerDescriptorRegistryProvider to set
+     */
+    public void setDataHandlerDescriptorRegistryProvider(DataHandlerDescriptorRegistryProvider dataHandlerDescriptorRegistryProvider) {
+        this.dataHandlerDescriptorRegistryProvider = dataHandlerDescriptorRegistryProvider;
+        if (dataHandlerDescriptorRegistryProvider != null) {
+            eventsTreePane.setDataHandlerDescriptorRegistry(this.dataHandlerDescriptorRegistryProvider.getDataHandlerDescriptorRegistry());
+        } else {
+            eventsTreePane.setDataHandlerDescriptorRegistry(null);
+        }
+    }
+
+    /**
+     * @return the eventManagerClientProvider
+     */
+    public EventManagerClientProvider getEventManagerClientProvider() {
+        return eventManagerClientProvider;
+    }
+
+    /**
+     * @param eventManagerClientProvider the eventManagerClientProvider to set
+     */
+    public void setEventManagerClientProvider(EventManagerClientProvider eventManagerClientProvider) {
+        this.eventManagerClientProvider = eventManagerClientProvider;
+        if (eventManagerClientProvider != null) {
+            List<EventDataHandler> eventDataHandlers = eventManagerClientProvider.getEventManagerClient().getAllEvents();
+            eventsTreePane.getEvents().addAll(eventDataHandlers);
+        } else {
+            eventsTreePane.getEvents().clear();
+        }
+    }
+
+    @Override
+    public void close() {
+        dataHandlerDescriptorRegistryProviderServiceTracker.close();
+        eventManagerClientProviderServiceTracker.close();
+    }
+
+}

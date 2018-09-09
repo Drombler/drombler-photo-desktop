@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.drombler.photo.fx.desktop</groupId>
+        <artifactId>drombler-photo-desktop-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../drombler-photo-desktop-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>drombler-photo-desktop-media-core</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>drombler-photo-desktop-media-core</name>
+
+    <!-- Not inherited!?? -->
+    <prerequisites>
+        <maven>${maven.version}</maven>
+    </prerequisites>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.drombler.media</groupId>
+            <artifactId>drombler-media-importer</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+    </dependencies>
+</project>
