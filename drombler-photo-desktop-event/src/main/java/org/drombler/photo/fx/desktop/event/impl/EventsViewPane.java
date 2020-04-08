@@ -1,37 +1,27 @@
 package org.drombler.photo.fx.desktop.event.impl;
 
-import java.time.Year;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-import org.drombler.commons.data.fx.DataHandlerRenderer;
-import org.drombler.commons.fx.scene.control.RenderedTreeCellFactory;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.layout.BorderPane;
-import javafx.util.Callback;
-import org.apache.commons.lang3.ClassUtils;
 import org.drombler.acp.core.commons.util.SimpleServiceTrackerCustomizer;
 import org.drombler.acp.core.data.spi.DataHandlerDescriptorRegistryProvider;
-import org.drombler.acp.core.data.spi.DataHandlerRegistryProvider;
 import org.osgi.util.tracker.ServiceTracker;
 
 import org.drombler.acp.core.docking.ViewDocking;
 import org.drombler.acp.core.docking.WindowMenuEntry;
-import org.drombler.commons.data.DataHandler;
 import org.drombler.commons.fx.concurrent.FXConsumer;
-import org.drombler.commons.fx.scene.renderer.DataRenderer;
-import org.drombler.commons.fx.scene.renderer.ObjectRenderer;
-import org.drombler.commons.fx.scene.renderer.time.YearRenderer;
 import org.drombler.event.core.Event;
-import org.drombler.event.core.FullTimeEventDuration;
+import org.drombler.media.core.MediaSource;
+import org.drombler.media.core.MediaStorage;
 import org.drombler.photo.fx.desktop.event.EventDataHandler;
 import org.drombler.photo.fx.desktop.event.EventManagerClientProvider;
 import org.drombler.photo.fx.desktop.event.EventsTreePane;
+import org.drombler.photo.fx.desktop.media.core.AbstractMediaSourceHandler;
+import org.drombler.photo.fx.desktop.media.core.MediaStorageClientProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -43,11 +33,15 @@ import org.drombler.photo.fx.desktop.event.EventsTreePane;
         = @WindowMenuEntry(path = "", position = 20))
 public class EventsViewPane extends BorderPane implements AutoCloseable {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventsViewPane.class);
+
     private final ServiceTracker<DataHandlerDescriptorRegistryProvider, DataHandlerDescriptorRegistryProvider> dataHandlerDescriptorRegistryProviderServiceTracker;
     private final ServiceTracker<EventManagerClientProvider, EventManagerClientProvider> eventManagerClientProviderServiceTracker;
+    private final ServiceTracker<MediaStorageClientProvider, MediaStorageClientProvider> mediaStorageClientProviderServiceTracker;
     private DataHandlerDescriptorRegistryProvider dataHandlerDescriptorRegistryProvider;
     private EventManagerClientProvider eventManagerClientProvider;
-    private EventsTreePane eventsTreePane = new EventsTreePane();
+    private final ObservableList<MediaStorageClientProvider<?, ?, ?>> mediaStorageClientProviders = FXCollections.observableArrayList();
+    private final EventsTreePane eventsTreePane = new EventsTreePane();
 
     public EventsViewPane() {
         setCenter(eventsTreePane);
@@ -56,6 +50,8 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
         this.dataHandlerDescriptorRegistryProviderServiceTracker.open(true);
         this.eventManagerClientProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(EventManagerClientProvider.class, new FXConsumer<>(this::setEventManagerClientProvider));
         this.eventManagerClientProviderServiceTracker.open(true);
+        this.mediaStorageClientProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(MediaStorageClientProvider.class, new FXConsumer<>(this::addMediaStorageClientProvider), new FXConsumer<>(this::removeMediaStorageClientProvider));
+        this.mediaStorageClientProviderServiceTracker.open(true);
     }
 
     /**
@@ -98,10 +94,51 @@ public class EventsViewPane extends BorderPane implements AutoCloseable {
         }
     }
 
+    public <M extends MediaSource<M>, S extends MediaStorage<M>, H extends AbstractMediaSourceHandler<M>> void addMediaStorageClientProvider(MediaStorageClientProvider<M, S, H> mediaStorageClientProvider) {
+        mediaStorageClientProviders.add(mediaStorageClientProvider);
+//        List<H> mediaSources = getMediaSources(mediaStorageClientProvider); // TODO: get sources outside Application Event Thread
+//        mediaSources.forEach(mediaSourceHandler -> {
+//            EventDataHandler event = getEvent(mediaSourceHandler);
+////            event.addMediaSource(mediaSourceHandler);
+//        });
+
+    }
+
+    private <M extends MediaSource<M>, S extends MediaStorage<M>, H extends AbstractMediaSourceHandler<M>> EventDataHandler getEvent(H mediaSourceHandler) {
+        final M mediaSource = mediaSourceHandler.getMediaSource();
+        Event event = mediaSource.getEvent();
+        return eventsTreePane.getEvents().stream()
+                .filter(eventDataHandler -> eventDataHandler.getEvent().equals(event))
+                .findAny()
+                .orElseGet(() -> {
+                    LOGGER.warn("New event {} found for mediaSource {}", mediaSource.getEvent(), mediaSource);
+                    EventDataHandler eventDataHandler = new EventDataHandler(event);
+                    eventsTreePane.getEvents().add(eventDataHandler);
+                    return eventDataHandler;
+                });
+    }
+
+    private <M extends MediaSource<M>, S extends MediaStorage<M>, H extends AbstractMediaSourceHandler<M>> List<H> getMediaSources(MediaStorageClientProvider<M, S, H> mediaStorageClientProvider) {
+        try {
+            return mediaStorageClientProvider.getMediaStorageClient().getMediaSources();
+        } catch (IOException ex) {
+            return null;
+        }
+    }
+
+//    private <M extends MediaSource<M>, S extends MediaStorage<M>, H extends AbstractMediaSourceHandler<M>> void addMediaStorageClientProvider(MediaStorageClientProvider<M, S, H> mediaStorageClientProvider){
+//        
+//    }
+    public void removeMediaStorageClientProvider(MediaStorageClientProvider<?, ?, ?> mediaStorageClientProvider) {
+        mediaStorageClientProviders.remove(mediaStorageClientProvider);
+        // TODO: remove treeItems etc.
+    }
+
     @Override
     public void close() {
         dataHandlerDescriptorRegistryProviderServiceTracker.close();
         eventManagerClientProviderServiceTracker.close();
+        mediaStorageClientProviderServiceTracker.close();
     }
 
 }

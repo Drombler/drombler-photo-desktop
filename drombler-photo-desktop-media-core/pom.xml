@@ -33,6 +33,9 @@
             <artifactId>drombler-media-importer</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        
+        <dependency>
+            <groupId>org.drombler.acp</groupId>
+            <artifactId>drombler-acp-core-data</artifactId>
+        </dependency>
     </dependencies>
 </project>

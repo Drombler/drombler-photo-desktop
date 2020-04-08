@@ -34,6 +34,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>drombler-photo-desktop-media-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.drombler.media</groupId>
             <artifactId>drombler-media-importer</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -78,6 +83,10 @@
         <dependency>
             <groupId>org.drombler.commons</groupId>
             <artifactId>drombler-commons-data-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
         </dependency>
     </dependencies>
 </project>
