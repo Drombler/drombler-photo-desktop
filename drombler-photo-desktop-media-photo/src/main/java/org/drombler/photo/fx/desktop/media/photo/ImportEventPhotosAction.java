@@ -10,7 +10,6 @@ import org.drombler.acp.core.data.spi.DataHandlerRegistryProvider;
 import org.drombler.commons.action.AbstractActionListener;
 import org.drombler.commons.client.dialog.DirectoryChooserProvider;
 import org.drombler.commons.data.Openable;
-
 import org.drombler.media.core.photo.PhotoStorage;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.util.tracker.ServiceTracker;
@@ -34,7 +33,6 @@ public class ImportEventPhotosAction extends AbstractActionListener<Object> impl
     private DirectoryChooserProvider directoryChooserProvider;
     private DataHandlerRegistryProvider dataHandlerRegistryProvider;
     private ApplicationThreadExecutorProvider applicationThreadExecutorProvider;
-
 
     public ImportEventPhotosAction() {
         this.applicationThreadExecutorProviderServiceTracker = SimpleServiceTrackerCustomizer.createServiceTracker(FrameworkUtil.getBundle(ImportEventPhotosAction.class).getBundleContext(),
@@ -60,7 +58,7 @@ public class ImportEventPhotosAction extends AbstractActionListener<Object> impl
     }
 
     private void openDirectory(Path directoryToOpen) {
-        PhotoStorage photoStorage = new PhotoStorage(directoryToOpen);
+        PhotoStorage photoStorage = new PhotoStorage(directoryToOpen.getFileName().toString(), directoryToOpen); // TODO: manage photo storages
         PhotoStorageHandler photoStorageHandler = new PhotoStorageHandler(photoStorage);
         dataHandlerRegistryProvider.getDataHandlerRegistry().registerDataHandler(photoStorageHandler);
         Openable openable = photoStorageHandler.getLocalContext().find(Openable.class);
@@ -126,7 +124,6 @@ public class ImportEventPhotosAction extends AbstractActionListener<Object> impl
         this.dataHandlerRegistryProvider = dataHandlerRegistryProvider;
         setEnabled(isInitialized());
     }
-
 
     @Override
     public void close() {

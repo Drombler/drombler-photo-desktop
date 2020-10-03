@@ -30,6 +30,11 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>drombler-photo-desktop-identity</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>drombler-photo-desktop-event</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -40,8 +45,7 @@
         </dependency>
         <dependency>
             <groupId>org.drombler.media</groupId>
-            <artifactId>drombler-media-importer</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>drombler-media-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.drombler.acp</groupId>

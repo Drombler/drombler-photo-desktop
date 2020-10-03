@@ -21,6 +21,7 @@
     <modules>
         <module>drombler-photo-desktop-parent</module>
         <module>drombler-photo-desktop-application</module>
+        <module>drombler-photo-desktop-identity</module>
         <module>drombler-photo-desktop-event</module>
         <module>drombler-photo-desktop-media-core</module>
         <module>drombler-photo-desktop-media-photo</module>

@@ -95,12 +95,10 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-                        <dependency>
-                <groupId>org.drombler.commons</groupId>
-                <artifactId>drombler-commons</artifactId>
-                <version>${drombler-commons.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+            <dependency>
+                <groupId>org.drombler.media</groupId>
+                <artifactId>drombler-media-core</artifactId>
+                <version>0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

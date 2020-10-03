@@ -2,10 +2,8 @@ package org.drombler.photo.fx.desktop.event;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.stream.Collectors;
 import org.drombler.commons.data.DataHandlerRegistry;
-import org.drombler.event.core.Event;
 import org.drombler.event.management.EventManager;
 
 /**
@@ -24,11 +22,8 @@ public class EventManagerClient {
 
     public List<EventDataHandler> getAllEvents() {
         return eventManager.getAllEvents().stream()
-                .map(event -> {
-                    EventDataHandler eventDataHandler = new EventDataHandler(event);
-                    dataHandlerRegistry.registerDataHandler(eventDataHandler);
-                    return eventDataHandler;
-                })
+                .map(EventDataHandler::new)
+                .map(dataHandlerRegistry::registerDataHandler)
                 .collect(Collectors.toList());
     }
 }

@@ -9,7 +9,7 @@ import org.drombler.commons.docking.DockableDataSensitive;
 import org.drombler.commons.docking.fx.FXDockableData;
 import org.drombler.commons.fx.concurrent.FXConsumer;
 import org.drombler.fx.core.docking.FXDockableDataUtils;
-import org.drombler.photo.fx.desktop.event.EventsTreePane;
+import org.drombler.photo.fx.desktop.media.core.MediaTreePane;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -21,7 +21,7 @@ public class EventPhotoImportPane extends BorderPane implements DockableDataSens
 
     private FXDockableData dockableData;
     private final PhotoStorageHandler photoStorageHandler;
-    private final EventsTreePane eventsTreePane = new EventsTreePane();
+    private final MediaTreePane eventsTreePane = new MediaTreePane();
 
     public EventPhotoImportPane(PhotoStorageHandler photoStorageHandler) {
         this.photoStorageHandler = photoStorageHandler;

@@ -1,10 +1,11 @@
 package org.drombler.photo.fx.desktop.media.photo;
 
 import org.drombler.commons.data.DataHandlerRegistry;
-import org.drombler.identity.core.DromblerIdentityProviderManager;
+import org.drombler.identity.management.DromblerIdentityProviderManager;
 import org.drombler.media.core.photo.PhotoSource;
 import org.drombler.media.core.photo.PhotoStorage;
 import org.drombler.photo.fx.desktop.media.core.AbstractMediaStorageClient;
+import org.softsmithy.lib.text.FormatException;
 
 public class PhotoStorageClient extends AbstractMediaStorageClient<PhotoSource, PhotoStorage, PhotoSourceHandler> {
 
@@ -14,7 +15,7 @@ public class PhotoStorageClient extends AbstractMediaStorageClient<PhotoSource, 
     }
 
     @Override
-    protected PhotoSourceHandler createMediaSourceHandler(PhotoSource photoSource) {
+    protected PhotoSourceHandler createMediaSourceHandler(PhotoSource photoSource) throws FormatException {
         return new PhotoSourceHandler(photoSource);
     }
 }

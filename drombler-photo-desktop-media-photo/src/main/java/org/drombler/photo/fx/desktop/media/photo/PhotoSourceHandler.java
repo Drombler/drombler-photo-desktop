@@ -1,10 +1,9 @@
 package org.drombler.photo.fx.desktop.media.photo;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import org.drombler.acp.core.data.AbstractDocumentHandler;
 import org.drombler.media.core.photo.PhotoSource;
 import org.drombler.photo.fx.desktop.media.core.AbstractMediaSourceHandler;
+import org.softsmithy.lib.text.FormatException;
 
 /**
  *
@@ -18,7 +17,7 @@ public class PhotoSourceHandler extends AbstractMediaSourceHandler<PhotoSource>{
         super(DEFAULT_FILE_EXTENSION);
     }
 
-    public PhotoSourceHandler(PhotoSource photoSource) {
+    public PhotoSourceHandler(PhotoSource photoSource) throws FormatException {
         super(DEFAULT_FILE_EXTENSION, photoSource);
     }
 

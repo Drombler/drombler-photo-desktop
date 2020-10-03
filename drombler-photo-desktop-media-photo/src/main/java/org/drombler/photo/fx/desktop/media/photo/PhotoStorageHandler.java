@@ -31,7 +31,7 @@ public class PhotoStorageHandler extends AbstractDirectoryHandler {
     
         @Override
     public String getTitle() {
-        return getPath().getParent().getFileName().toString();
+        return photoStorage.getName();
     }
 
 }
